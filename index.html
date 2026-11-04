@@ -4,28 +4,86 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ocarina of Time - Countdown</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 90'%3E%3Crect width='100' height='90' rx='14' fill='%230b1a12'/%3E%3Cg fill='%23e6c35c'%3E%3Cpolygon points='50,8 69,41 31,41'/%3E%3Cpolygon points='31,45 50,78 12,78'/%3E%3Cpolygon points='69,45 88,78 50,78'/%3E%3C/g%3E%3C/svg%3E">
+<meta name="theme-color" content="#0b1a12">
+<meta name="description" content="Nedräkning till The Legend of Zelda: Ocarina of Time - 5 november 2026">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Legend of Zelda: Ocarina of Time - Countdown">
+<meta property="og:description" content="Släpps 5 november 2026. Hur lång tid är det kvar?">
+<meta property="og:url" content="https://nitad.github.io/zelda-countdown/">
+<meta property="og:image" content="https://nitad.github.io/zelda-countdown/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <style>
-  :root { --bg:#0b1a12; --fg:#e8f3d6; --gold:#e6c35c; --green:#4caf50; }
+  :root { --bg:#0b1a12; --fg:#e8f3d6; --gold:#e6c35c; --green:#6fcf6f; }
   * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
   body {
-    margin: 0; min-height: 100vh; display: grid; place-items: center; text-align: center;
-    background: radial-gradient(ellipse at top, #16422a 0%, var(--bg) 70%);
+    display: grid; place-items: center; text-align: center; overflow: hidden; position: relative;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(230,195,92,.12) 0%, transparent 55%),
+      radial-gradient(ellipse at top, #1d5a37 0%, var(--bg) 75%);
     color: var(--fg); font-family: Georgia, "Times New Roman", serif; padding: 16px;
   }
-  h1 { font-size: clamp(1.6rem, 5vw, 3rem); color: var(--gold); margin: 0 0 .25em; letter-spacing: .04em; }
-  p { margin: 0 0 2rem; opacity: .8; }
+  main { position: relative; z-index: 1; }
+  .triforce { width: clamp(70px, 14vw, 110px); filter: drop-shadow(0 0 14px rgba(230,195,92,.7));
+              animation: glow 3.5s ease-in-out infinite; }
+  @keyframes glow { 50% { filter: drop-shadow(0 0 26px rgba(230,195,92,1)); } }
+  .eyebrow { letter-spacing: .35em; text-transform: uppercase; font-size: .8rem; color: var(--gold); opacity: .85; margin: .6rem 0 0; }
+  h1 { font-size: clamp(1.7rem, 5.5vw, 3.2rem); color: var(--gold); margin: .15em 0 .2em; letter-spacing: .04em;
+       text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+  .ocarina { width: clamp(110px, 20vw, 170px); margin: .2rem auto 1rem; display: block;
+             filter: drop-shadow(0 6px 10px rgba(0,0,0,.5)); animation: bob 5s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-6px) rotate(-2deg); } }
+  p.date { margin: 0 0 1.8rem; opacity: .8; }
   .timer { display: flex; gap: clamp(8px, 3vw, 28px); justify-content: center; }
-  .box { min-width: clamp(64px, 18vw, 130px); padding: 18px 8px; border: 2px solid var(--gold);
-         border-radius: 10px; background: rgba(0,0,0,.35); }
+  .box { min-width: clamp(64px, 17vw, 130px); padding: 18px 8px; border: 2px solid var(--gold);
+         border-radius: 10px; background: rgba(0,0,0,.4); box-shadow: 0 0 18px rgba(230,195,92,.15) inset; }
   .num { display: block; font-size: clamp(2rem, 9vw, 4.5rem); font-variant-numeric: tabular-nums; color: var(--green); }
-  .label { font-size: .85rem; text-transform: uppercase; letter-spacing: .15em; }
+  .label { font-size: .8rem; text-transform: uppercase; letter-spacing: .15em; }
   #done { display: none; font-size: clamp(1.8rem, 6vw, 3.5rem); color: var(--gold); }
+
+  .leaf { position: fixed; z-index: 0; pointer-events: none; transform-origin: 50% 0%;
+          animation: sway var(--dur) ease-in-out var(--delay) infinite alternate; }
+  @keyframes sway { from { transform: rotate(calc(var(--rot) - 6deg)); } to { transform: rotate(calc(var(--rot) + 6deg)); } }
+  @media (max-width: 600px) {
+    .leaf { opacity: .4; zoom: .6; }
+    .timer { gap: 6px; }
+    .box { flex: 1; min-width: 0; padding: 14px 2px; }
+    .label { font-size: .6rem; letter-spacing: .05em; }
+    main { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 </head>
 <body>
+<div id="leaves" aria-hidden="true"></div>
 <main>
-  <h1>The Legend of Zelda: Ocarina of Time</h1>
-  <p>Släpps 5 november 2026, 00:00 CET</p>
+  <svg class="triforce" viewBox="0 0 100 90" aria-hidden="true">
+    <g fill="#e6c35c" stroke="#a8841f" stroke-width="1.5" stroke-linejoin="round">
+      <polygon points="50,6 69,40 31,40"/><polygon points="31,45 50,79 12,79"/><polygon points="69,45 88,79 50,79"/>
+    </g>
+  </svg>
+  <p class="eyebrow">Nedräkning till</p>
+  <h1>The Legend of Zelda:<br>Ocarina of Time</h1>
+
+  <svg class="ocarina" viewBox="0 0 200 130" aria-hidden="true">
+    <defs>
+      <linearGradient id="oc" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#7fb8ff"/><stop offset="1" stop-color="#2c5fb8"/>
+      </linearGradient>
+    </defs>
+    <path d="M22 78 C20 42 62 22 108 32 L146 44 C176 52 190 82 168 100 C140 122 56 124 34 104 C26 97 22 88 22 78Z"
+          fill="url(#oc)" stroke="#173a73" stroke-width="3"/>
+    <path d="M142 46 L168 22 L184 34 L160 60Z" fill="url(#oc)" stroke="#173a73" stroke-width="3" stroke-linejoin="round"/>
+    <g fill="#12295a"><circle cx="62" cy="84" r="6"/><circle cx="84" cy="74" r="6"/><circle cx="108" cy="72" r="6"/>
+       <circle cx="130" cy="78" r="6"/><circle cx="80" cy="98" r="7"/><circle cx="110" cy="96" r="7"/></g>
+    <g fill="#e6c35c"><polygon points="68,42 78,58 58,58"/><polygon points="58,61 68,77 48,77" transform="translate(-3 -2)"/>
+       <polygon points="78,61 88,77 68,77" transform="translate(3 -2)"/></g>
+  </svg>
+
+  <p class="date">Släpps 5 november 2026, 00:00 CET</p>
   <div class="timer" id="timer">
     <div class="box"><span class="num" id="d">0</span><span class="label">Dagar</span></div>
     <div class="box"><span class="num" id="h">00</span><span class="label">Timmar</span></div>
@@ -35,10 +93,32 @@
   <div id="done">Det är dags! 🎶</div>
 </main>
 <script>
+  // Leaves framing both sides
+  const leafSvg = (c1, c2) => `<svg viewBox="0 0 40 80" width="100%" height="100%">
+    <path d="M20 2 C42 22 42 58 20 78 C-2 58 -2 22 20 2Z" fill="${c1}"/>
+    <path d="M20 6 L20 74" stroke="${c2}" stroke-width="1.5" fill="none"/></svg>`;
+  const greens = [["#2f7d3f", "#a9e3a0"], ["#3f9a4f", "#bff0b4"], ["#1f5e33", "#86c987"], ["#58b45f", "#d6f7cc"]];
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const box = document.getElementById("leaves");
+  for (const side of ["left", "right"]) {
+    for (let i = 0; i < 16; i++) {
+      const el = document.createElement("div");
+      const w = 26 + rnd() * 34, [c1, c2] = greens[Math.floor(rnd() * greens.length)];
+      el.className = "leaf";
+      el.style.cssText = `${side}:${-w * 0.35 + rnd() * 26}px; top:${(i / 16) * 100 - 4 + rnd() * 4}vh;
+        width:${w}px; height:${w * 2}px; --rot:${(side === "left" ? -1 : 1) * (35 + rnd() * 50)}deg;
+        --dur:${3 + rnd() * 3}s; --delay:${-rnd() * 4}s;`;
+      el.innerHTML = leafSvg(c1, c2);
+      box.appendChild(el);
+    }
+  }
+
+  // Countdown
   const target = new Date("2026-11-05T00:00:00+01:00");
   const pad = n => String(n).padStart(2, "0");
   function tick() {
-    let diff = Math.floor((target - Date.now()) / 1000);
+    const diff = Math.floor((target - Date.now()) / 1000);
     if (diff <= 0) {
       document.getElementById("timer").style.display = "none";
       document.getElementById("done").style.display = "block";
