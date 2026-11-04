@@ -3,95 +3,135 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ocarina of Time - Countdown</title>
+<title>Ocarina of Time Remake - Countdown</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 90'%3E%3Crect width='100' height='90' rx='14' fill='%230b1a12'/%3E%3Cg fill='%23e6c35c'%3E%3Cpolygon points='50,8 69,41 31,41'/%3E%3Cpolygon points='31,45 50,78 12,78'/%3E%3Cpolygon points='69,45 88,78 50,78'/%3E%3C/g%3E%3C/svg%3E">
 <meta name="theme-color" content="#0b1a12">
-<meta name="description" content="Nedräkning till The Legend of Zelda: Ocarina of Time - 5 november 2026">
+<meta name="description" content="Nedräkning till The Legend of Zelda: Ocarina of Time Remake - 5 november 2026, 00:00 CET">
 <meta property="og:type" content="website">
-<meta property="og:title" content="The Legend of Zelda: Ocarina of Time - Countdown">
-<meta property="og:description" content="Släpps 5 november 2026. Hur lång tid är det kvar?">
+<meta property="og:title" content="Ocarina of Time Remake - Countdown">
+<meta property="og:description" content="Släpps 5 november 2026, 00:00 CET. Hur lång tid är det kvar?">
 <meta property="og:url" content="https://nitad.github.io/zelda-countdown/">
 <meta property="og:image" content="https://nitad.github.io/zelda-countdown/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;1,400&family=Marcellus&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#0b1a12; --fg:#e8f3d6; --gold:#e6c35c; --green:#6fcf6f; }
+  :root {
+    --forest:#0a1a12; --moss:#1d5a37; --gold:#e6c35c; --gold-dim:#a8841f;
+    --parchment:#efe6c8; --night:#0d1b3a; --leaf:#7fd37f;
+    --display:"Marcellus", "Trajan Pro", Georgia, serif;
+    --text:"Alegreya", Georgia, serif;
+    --t:0; /* 0 = dawn, 1 = midnight; set by script */
+  }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
   body {
-    display: grid; place-items: center; text-align: center; overflow: hidden; position: relative;
-    background:
-      radial-gradient(ellipse at 50% 30%, rgba(230,195,92,.12) 0%, transparent 55%),
-      radial-gradient(ellipse at top, #1d5a37 0%, var(--bg) 75%);
-    color: var(--fg); font-family: Georgia, "Times New Roman", serif; padding: 16px;
+    position: relative; overflow: hidden; background: var(--forest); color: var(--parchment);
+    font-family: var(--text); font-size: 1.125rem; line-height: 1.5;
   }
-  main { position: relative; z-index: 1; }
-  .triforce { width: clamp(70px, 14vw, 110px); filter: drop-shadow(0 0 14px rgba(230,195,92,.7));
-              animation: glow 3.5s ease-in-out infinite; }
-  @keyframes glow { 50% { filter: drop-shadow(0 0 26px rgba(230,195,92,1)); } }
-  .eyebrow { letter-spacing: .35em; text-transform: uppercase; font-size: .8rem; color: var(--gold); opacity: .85; margin: .6rem 0 0; }
-  h1 { font-size: clamp(1.7rem, 5.5vw, 3.2rem); color: var(--gold); margin: .15em 0 .2em; letter-spacing: .04em;
-       text-shadow: 0 2px 12px rgba(0,0,0,.6); }
-  .ocarina { width: clamp(110px, 20vw, 170px); margin: .2rem auto 1rem; display: block;
-             filter: drop-shadow(0 6px 10px rgba(0,0,0,.5)); animation: bob 5s ease-in-out infinite; }
-  @keyframes bob { 50% { transform: translateY(-6px) rotate(-2deg); } }
-  p.date { margin: 0 0 1.8rem; opacity: .8; }
-  .timer { display: flex; gap: clamp(8px, 3vw, 28px); justify-content: center; }
-  .box { min-width: clamp(64px, 17vw, 130px); padding: 18px 8px; border: 2px solid var(--gold);
-         border-radius: 10px; background: rgba(0,0,0,.4); box-shadow: 0 0 18px rgba(230,195,92,.15) inset; }
-  .num { display: block; font-size: clamp(2rem, 9vw, 4.5rem); font-variant-numeric: tabular-nums; color: var(--green); }
-  .label { font-size: .8rem; text-transform: uppercase; letter-spacing: .15em; }
-  #done { display: none; font-size: clamp(1.8rem, 6vw, 3.5rem); color: var(--gold); }
 
-  .leaf { position: fixed; z-index: 0; pointer-events: none; transform-origin: 50% 0%;
+  /* Sky: dawn and night layers cross-fade; the sun becomes the moon at midnight */
+  .sky, .night { position: fixed; inset: 0; }
+  .sky { background: linear-gradient(180deg, #2f7a58 0%, #4f8f63 34%, #9aa865 58%, #c9b66a 70%, #0a1a12 100%); }
+  .night { background: linear-gradient(180deg, #060d22 0%, #0d1b3a 45%, #14402e 80%, #0a1a12 100%);
+           opacity: var(--night-o, 0); }
+  .stars { position: fixed; inset: 0 0 40% 0; opacity: var(--night-o, 0);
+    background:
+      radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 27% 8%, #fff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 44% 22%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 63% 12%, #fff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 78% 26%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 90% 9%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 35% 32%, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 70% 36%, #fff 50%, transparent 51%); }
+  .orb { position: fixed; width: clamp(54px, 9vw, 96px); aspect-ratio: 1; border-radius: 50%;
+         left: calc(8% + 84% * var(--t) - clamp(27px, 4.5vw, 48px));
+         top: calc(46vh - 38vh * sin(var(--t) * 3.14159) - clamp(27px, 4.5vw, 48px)); }
+  .sun { background: radial-gradient(circle at 40% 40%, #fff6c2, #f1c64a 60%, #e39b2a);
+         box-shadow: 0 0 60px 20px rgba(255,214,102,.45); opacity: var(--sun-o, 1); }
+  .moon { background: radial-gradient(circle at 38% 38%, #ffffff, #d7def0 65%, #aab6d4);
+          box-shadow: 0 0 50px 12px rgba(190,205,255,.35); opacity: var(--night-o, 0); }
+  .hills { position: fixed; left: 0; right: 0; bottom: 0; width: 100%; height: 34vh; display: block; }
+
+  /* Leaf frame at both edges */
+  .leaf { position: fixed; z-index: 1; pointer-events: none; transform-origin: 50% 0%;
           animation: sway var(--dur) ease-in-out var(--delay) infinite alternate; }
   @keyframes sway { from { transform: rotate(calc(var(--rot) - 6deg)); } to { transform: rotate(calc(var(--rot) + 6deg)); } }
+
+  main { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column;
+         align-items: center; justify-content: center; text-align: center; padding: 16px 16px 6vh; }
+
+  .ocarina { width: clamp(120px, 18vw, 170px); display: block; margin-bottom: .9rem;
+             filter: drop-shadow(0 8px 12px rgba(0,0,0,.45)); animation: bob 6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-6px) rotate(-2deg); } }
+
+  .series { margin: 0; font-style: italic; font-size: 1.2rem; color: var(--gold); }
+  h1 { margin: 0; font-family: var(--display); font-weight: 400; color: var(--parchment);
+       font-size: clamp(2.6rem, 9vw, 5.6rem); line-height: 1.02; letter-spacing: .01em;
+       text-shadow: 0 2px 18px rgba(0,0,0,.55); }
+  .seal { display: inline-block; margin-top: .7rem; padding: .1rem .9rem .15rem; border: 1px solid var(--gold);
+          border-radius: 999px; color: var(--gold); font-family: var(--display); font-size: 1.05rem; background: rgba(10,26,18,.55); }
+
+  .timer { display: flex; align-items: flex-start; justify-content: center; gap: clamp(14px, 4vw, 44px);
+           margin: clamp(1.2rem, 4vh, 2.4rem) 0 .6rem; }
+  .unit { min-width: clamp(72px, 14vw, 140px); }
+  .unit + .unit { padding-left: clamp(14px, 4vw, 44px); border-left: 1px solid rgba(239,230,200,.55); margin-left: calc(-1 * clamp(14px, 4vw, 44px) / 2); }
+  .num { display: block; font-family: var(--text); font-weight: 500; font-size: clamp(2.8rem, 10.5vw, 6rem); line-height: 1.05;
+         color: #fff7d6; font-variant-numeric: lining-nums tabular-nums; text-shadow: 0 2px 16px rgba(0,0,0,.5); }
+  .word { font-style: italic; color: var(--parchment); text-shadow: 0 1px 8px rgba(0,0,0,.85), 0 0 3px rgba(0,0,0,.6); }
+  .date { margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+  #done { display: none; font-family: var(--display); font-size: clamp(2.4rem, 8vw, 4.6rem); color: var(--gold); margin: 1.5rem 0 0; }
+
   @media (max-width: 600px) {
     .leaf { opacity: .4; zoom: .6; }
-    .timer { gap: 6px; }
-    .box { flex: 1; min-width: 0; padding: 14px 2px; }
-    .label { font-size: .6rem; letter-spacing: .05em; }
-    main { width: 100%; }
+    .unit { min-width: 0; }
+    .unit + .unit { margin-left: 0; padding-left: 12px; }
+    .timer { gap: 12px; }
+    .word { font-size: .95rem; }
   }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 </head>
 <body>
+<div class="sky"></div><div class="night"></div><div class="stars"></div>
+<div class="orb sun"></div><div class="orb moon"></div>
+<svg class="hills" viewBox="0 0 1440 300" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 150 C180 70 360 120 560 140 C760 160 900 60 1100 90 C1260 114 1360 150 1440 120 L1440 300 L0 300Z" fill="#12402a" opacity=".85"/>
+  <path d="M0 210 C200 150 420 200 640 190 C860 180 1060 140 1240 170 C1340 186 1400 200 1440 190 L1440 300 L0 300Z" fill="#0a2616"/>
+</svg>
 <div id="leaves" aria-hidden="true"></div>
-<main>
-  <svg class="triforce" viewBox="0 0 100 90" aria-hidden="true">
-    <g fill="#e6c35c" stroke="#a8841f" stroke-width="1.5" stroke-linejoin="round">
-      <polygon points="50,6 69,40 31,40"/><polygon points="31,45 50,79 12,79"/><polygon points="69,45 88,79 50,79"/>
-    </g>
-  </svg>
-  <p class="eyebrow">Nedräkning till</p>
-  <h1>The Legend of Zelda:<br>Ocarina of Time</h1>
 
+<main>
   <svg class="ocarina" viewBox="0 0 200 130" aria-hidden="true">
     <defs>
-      <linearGradient id="oc" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#7fb8ff"/><stop offset="1" stop-color="#2c5fb8"/>
-      </linearGradient>
+      <linearGradient id="oc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8cc2ff"/><stop offset="1" stop-color="#2c5fb8"/></linearGradient>
     </defs>
-    <path d="M22 78 C20 42 62 22 108 32 L146 44 C176 52 190 82 168 100 C140 122 56 124 34 104 C26 97 22 88 22 78Z"
-          fill="url(#oc)" stroke="#173a73" stroke-width="3"/>
+    <path d="M22 78 C20 42 62 22 108 32 L146 44 C176 52 190 82 168 100 C140 122 56 124 34 104 C26 97 22 88 22 78Z" fill="url(#oc)" stroke="#173a73" stroke-width="3"/>
     <path d="M142 46 L168 22 L184 34 L160 60Z" fill="url(#oc)" stroke="#173a73" stroke-width="3" stroke-linejoin="round"/>
-    <g fill="#12295a"><circle cx="62" cy="84" r="6"/><circle cx="84" cy="74" r="6"/><circle cx="108" cy="72" r="6"/>
-       <circle cx="130" cy="78" r="6"/><circle cx="80" cy="98" r="7"/><circle cx="110" cy="96" r="7"/></g>
-    <g fill="#e6c35c"><polygon points="68,42 78,58 58,58"/><polygon points="58,61 68,77 48,77" transform="translate(-3 -2)"/>
-       <polygon points="78,61 88,77 68,77" transform="translate(3 -2)"/></g>
+    <g fill="#12295a"><circle cx="100" cy="64" r="6"/><circle cx="120" cy="66" r="6"/><circle cx="140" cy="74" r="6"/>
+       <circle cx="108" cy="90" r="7"/><circle cx="134" cy="92" r="7"/></g>
+    <g fill="#e6c35c" stroke="#a8841f" stroke-width=".8" stroke-linejoin="round">
+      <polygon points="60,54 70,71 50,71"/><polygon points="49,74 59,91 39,91"/><polygon points="71,74 81,91 61,91"/></g>
   </svg>
 
-  <p class="date">Släpps 5 november 2026, 00:00 CET</p>
-  <div class="timer" id="timer">
-    <div class="box"><span class="num" id="d">0</span><span class="label">Dagar</span></div>
-    <div class="box"><span class="num" id="h">00</span><span class="label">Timmar</span></div>
-    <div class="box"><span class="num" id="m">00</span><span class="label">Minuter</span></div>
-    <div class="box"><span class="num" id="s">00</span><span class="label">Sekunder</span></div>
+  <p class="series">The Legend of Zelda</p>
+  <h1>Ocarina of Time</h1>
+  <span class="seal">Remake</span>
+
+  <div class="timer" id="timer" role="timer" aria-live="off">
+    <div class="unit" id="u-d"><span class="num" id="d">0</span><span class="word">dagar</span></div>
+    <div class="unit"><span class="num" id="h">00</span><span class="word">timmar</span></div>
+    <div class="unit"><span class="num" id="m">00</span><span class="word">minuter</span></div>
+    <div class="unit"><span class="num" id="s">00</span><span class="word">sekunder</span></div>
   </div>
-  <div id="done">Det är dags! 🎶</div>
+  <p class="date">Släpps 5 november 2026, 00:00 CET</p>
+  <p id="done">Det är dags.</p>
 </main>
+
 <script>
   // Leaves framing both sides
   const leafSvg = (c1, c2) => `<svg viewBox="0 0 40 80" width="100%" height="100%">
@@ -114,17 +154,26 @@
     }
   }
 
-  // Countdown
+  // Countdown. The sun crosses the sky during the last 24 hours and turns into the moon at release.
   const target = new Date("2026-11-05T00:00:00+01:00");
   const pad = n => String(n).padStart(2, "0");
+  const root = document.documentElement.style;
+  const smooth = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
   function tick() {
     const diff = Math.floor((target - Date.now()) / 1000);
+    const t = Math.min(1, Math.max(0, 1 - diff / 86400));
+    const night = smooth(0.55, 0.95, t);
+    root.setProperty("--t", t.toFixed(5));
+    root.setProperty("--night-o", night.toFixed(3));
+    root.setProperty("--sun-o", (1 - smooth(0.8, 0.97, t)).toFixed(3));
     if (diff <= 0) {
       document.getElementById("timer").style.display = "none";
       document.getElementById("done").style.display = "block";
       return clearInterval(id);
     }
-    document.getElementById("d").textContent = Math.floor(diff / 86400);
+    const days = Math.floor(diff / 86400);
+    document.getElementById("u-d").style.display = days > 0 ? "" : "none";
+    document.getElementById("d").textContent = days;
     document.getElementById("h").textContent = pad(Math.floor(diff % 86400 / 3600));
     document.getElementById("m").textContent = pad(Math.floor(diff % 3600 / 60));
     document.getElementById("s").textContent = pad(diff % 60);
